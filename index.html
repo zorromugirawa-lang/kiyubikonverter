@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium PDF Tools - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --glass-border: rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+        }
+
+        /* Navigation Header */
+        .main-nav {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin-bottom: 60px;
+        }
+
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .page-content {
+            padding: 0 20px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            max-width: 700px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .tool-card {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.1);
+            border-color: var(--primary);
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            transition: 0.3s;
+        }
+
+        .tool-card:hover .icon-box {
+            background: #eef2ff;
+            color: var(--primary);
+            transform: rotate(-5deg);
+        }
+
+        .icon-box i { font-size: 40px; color: var(--primary); }
+
+        .tool-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .tool-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .btn-open {
+            margin-top: 24px;
+            padding: 10px 20px;
+            background: #f1f5f9;
+            color: var(--primary);
+            font-weight: 600;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .tool-card:hover .btn-open {
+            background: var(--primary);
+            color: white;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="main-nav">
+    <a href="index.html" class="nav-logo">
+        <i class="ph ph-lightning-fill"></i>
+        <span>Kiyubi Converter</span>
+    </a>
+    <div class="nav-links">
+        <a href="index.html" class="active">Beranda</a>
+        <a href="converter.html">PDF ke JPG</a>
+        <a href="pdftoword.html">PDF ke Word</a>
+    </div>
+</nav>
+
+<div class="page-content">
+    <header>
+        <h1>Kiyubi Converter</h1>
+        <p class="subtitle">Solusi cerdas untuk mengolah dokumen PDF Anda secara instan, aman, dan tanpa biaya.</p>
+    </header>
+
+<div class="tools-grid">
+    <a href="converter.html" class="tool-card">
+        <div class="icon-box">
+            <i class="ph ph-image"></i>
+        </div>
+        <h2>PDF ke JPG</h2>
+        <p>Ubah setiap halaman PDF menjadi gambar berkualitas tinggi (JPEG) dalam hitungan detik.</p>
+        <div class="btn-open">Buka Alat</div>
+    </a>
+
+    <a href="pdftoword.html" class="tool-card">
+        <div class="icon-box">
+            <i class="ph ph-file-doc"></i>
+        </div>
+        <h2>PDF ke Word</h2>
+        <p>Ekstrak teks dari dokumen PDF dan simpan sebagai file DOCX yang dapat diedit di Microsoft Word.</p>
+        <div class="btn-open">Buka Alat</div>
+    </a>
+</div>
+</div>
+
+<footer>
+    <p>&copy; 2026 Kiyubi Converter. Dibuat dengan &hearts;</p>
+</footer>
+
+</body>
+</html>

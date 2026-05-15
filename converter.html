@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium PDF to JPG Converter</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #7c3aed;
+            --bg-body: #f8fafc;
+            --container-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --drop-zone-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+        }
+
+        /* Navigation Header */
+        .main-nav {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .page-content {
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--container-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            background: var(--drop-zone-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #eef2ff;
+            transform: scale(1.01);
+        }
+
+        .drop-zone i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .drop-zone p {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .drop-zone span {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        #pdf-upload {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Status Section */
+        #status-container {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .loader {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #c7d2fe;
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Grid Results */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .page-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: slideUp 0.5s ease-out both;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1.4;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        canvas {
+            max-width: 90%;
+            max-height: 90%;
+            display: block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-info span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        footer {
+            margin-top: 40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        @media (max-width: 640px) {
+            .container { padding: 24px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+
+</head>
+<body>
+
+<nav class="main-nav">
+    <a href="index.html" class="nav-logo">
+        <i class="ph ph-lightning-fill"></i>
+        <span>Kiyubi Converter</span>
+    </a>
+    <div class="nav-links">
+        <a href="index.html">Beranda</a>
+        <a href="converter.html" class="active">PDF ke JPG</a>
+        <a href="pdftoword.html">PDF ke Word</a>
+    </div>
+</nav>
+
+<div class="page-content">
+    <div class="container">
+    <header>
+        <h1>PDF ke JPG</h1>
+        <p class="subtitle">Konversi halaman PDF menjadi gambar kualitas tinggi secara instan.</p>
+    </header>
+    
+    <div class="drop-zone" id="drop-zone">
+        <i class="ph ph-cloud-arrow-up"></i>
+        <p>Klik atau Seret File PDF ke Sini</p>
+        <span>Mendukung file PDF standar (Maks. 50MB)</span>
+        <input type="file" id="pdf-upload" accept="application/pdf">
+    </div>
+
+    <div id="status-container">
+        <div class="status-badge">
+            <div class="loader" id="loader"></div>
+            <span id="status-text">Menunggu file...</span>
+        </div>
+    </div>
+
+    <div id="preview-container" class="preview-grid"></div>
+</div>
+</div>
+
+<footer>
+    <p>&copy; 2026 Kiyubi Converter. Dibuat dengan &hearts;</p>
+</footer>
+
+<script>
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const fileInput = document.getElementById('pdf-upload');
+    const dropZone = document.getElementById('drop-zone');
+    const statusContainer = document.getElementById('status-container');
+    const statusText = document.getElementById('status-text');
+    const loader = document.getElementById('loader');
+    const previewContainer = document.getElementById('preview-container');
+
+    // Handle Drag & Drop styles
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+        });
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        processPDF(file);
+    });
+
+    async function processPDF(file) {
+        statusContainer.style.display = 'block';
+        statusText.textContent = "Membaca file PDF...";
+        loader.style.display = 'block';
+        previewContainer.innerHTML = "";
+
+        const reader = new FileReader();
+        reader.onload = async function() {
+            try {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+
+                statusText.textContent = `Ditemukan ${pdf.numPages} halaman. Mengonversi ke Ultra HD...`;
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 5.0 }); // Ultra HD Scale
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    
+                    // Aktifkan kualitas gambar terbaik di canvas
+                    context.imageSmoothingEnabled = true;
+                    context.imageSmoothingQuality = 'high';
+                    
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                    // Convert to maximum quality JPEG
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    
+                    // Create Card UI
+                    const card = document.createElement('div');
+                    card.className = 'page-card';
+                    card.style.animationDelay = `${i * 0.1}s`;
+                    
+                    const canvasWrapper = document.createElement('div');
+                    canvasWrapper.className = 'canvas-wrapper';
+                    
+                    // Preview tetap kecil untuk performa UI, tapi download tetap Ultra HD
+                    const previewCanvas = document.createElement('canvas');
+                    const previewCtx = previewCanvas.getContext('2d');
+                    const previewScale = 400 / canvas.width;
+                    previewCanvas.width = 400;
+                    previewCanvas.height = canvas.height * previewScale;
+                    previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
+                    
+                    canvasWrapper.appendChild(previewCanvas);
+                    
+                    const info = document.createElement('div');
+                    info.className = 'card-info';
+                    info.innerHTML = `
+                        <span>HALAMAN ${i}</span>
+                        <a href="${imgData}" download="halaman-${i}-UltraHD.jpg" class="download-btn">
+                            <i class="ph ph-download-simple"></i> Unduh JPG Ultra HD
+                        </a>
+                    `;
+                    
+                    card.appendChild(canvasWrapper);
+                    card.appendChild(info);
+                    previewContainer.appendChild(card);
+                }
+                
+                statusText.textContent = "Berhasil Dikonversi ke Ultra HD!";
+                loader.style.display = 'none';
+            } catch (err) {
+                console.error(err);
+                statusText.textContent = "Error: Gagal memproses PDF.";
+                loader.style.display = 'none';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+
+</body>
+</html>
