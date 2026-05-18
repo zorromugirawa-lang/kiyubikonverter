@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word ke Excel - Premium Converter</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #7c3aed;
+            --bg-body: #f8fafc;
+            --container-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --drop-zone-bg: #f1f5f9;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+        }
+
+        /* Navigation Header */
+        .main-nav {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .page-content {
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--container-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header { margin-bottom: 30px; }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle { color: var(--text-muted); font-size: 1rem; }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            background: var(--drop-zone-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .drop-zone i { font-size: 48px; color: var(--primary); margin-bottom: 16px; }
+
+        .drop-zone p { font-weight: 500; color: var(--text-main); }
+
+        #word-input {
+            position: absolute;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            opacity: 0; cursor: pointer;
+        }
+
+        /* Status & Actions */
+        #status-container { margin: 20px 0; display: none; }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .loader {
+            width: 16px; height: 16px;
+            border: 2px solid #c7d2fe;
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-convert {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-convert:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-convert:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        footer { margin-top: auto; padding: 40px 0; color: var(--text-muted); font-size: 0.9rem; }
+
+    </style>
+</head>
+<body>
+
+<nav class="main-nav">
+    <a href="index.html" class="nav-logo">
+        <i class="ph ph-lightning-fill"></i>
+        <span>Kiyubi Converter</span>
+    </a>
+    <div class="nav-links">
+        <a href="index.html">Beranda</a>
+        <a href="converter.html">PDF ke JPG</a>
+        <a href="pdftoword.html">PDF ke Word</a>
+        <a href="wordtoexcel.html" class="active">Word ke Excel</a>
+    </div>
+</nav>
+
+<div class="page-content">
+    <div class="container">
+        <header>
+            <h1>Word ke Excel</h1>
+            <p class="subtitle">Ekstrak tabel dari dokumen Word Anda menjadi file Excel yang siap digunakan.</p>
+        </header>
+
+        <div class="drop-zone" id="drop-zone">
+            <i class="ph ph-table"></i>
+            <p id="file-name">Klik atau Seret File Word (.docx) ke Sini</p>
+            <input type="file" id="word-input" accept=".docx">
+        </div>
+
+        <div id="status-container">
+            <div class="status-badge">
+                <div class="loader" id="loader"></div>
+                <span id="status-text">Menunggu...</span>
+            </div>
+        </div>
+
+        <button id="convert-btn" class="btn-convert">
+            <i class="ph ph-magic-wand"></i> Konversi Sekarang
+        </button>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 Kiyubi Converter. Dibuat dengan &hearts;</p>
+</footer>
+
+<script>
+    const input = document.getElementById('word-input');
+    const dropZone = document.getElementById('drop-zone');
+    const btn = document.getElementById('convert-btn');
+    const statusContainer = document.getElementById('status-container');
+    const statusText = document.getElementById('status-text');
+    const loader = document.getElementById('loader');
+    const fileNameText = document.getElementById('file-name');
+
+    let wordFile = null;
+
+    input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleFileSelection(file);
+    });
+
+    // Drag & Drop logic
+    ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+    });
+
+    function handleFileSelection(file) {
+        wordFile = file;
+        fileNameText.textContent = file.name;
+        btn.style.display = 'flex';
+        statusContainer.style.display = 'block';
+        statusText.textContent = "File siap. Klik konversi.";
+        loader.style.display = 'none';
+    }
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        loader.style.display = 'block';
+        
+        try {
+            statusText.textContent = "Membaca file...";
+            const arrayBuffer = await wordFile.arrayBuffer();
+            
+            statusText.textContent = "Mengekstrak data dari Word...";
+            // Convert DOCX ke HTML menggunakan mammoth
+            const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+            const html = result.value;
+            
+            // Buat temporary element untuk parse tabel
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            const tables = tempDiv.getElementsByTagName('table');
+            
+            if (tables.length === 0) {
+                throw new Error("Tidak ditemukan tabel di dokumen Word.");
+            }
+
+            statusText.textContent = "Membangun file Excel...";
+            const wb = XLSX.utils.book_new();
+            
+            for (let i = 0; i < tables.length; i++) {
+                const table = tables[i];
+                const jsonData = [];
+                
+                // Parse tabel ke array
+                for (let row of table.rows) {
+                    const rowData = [];
+                    for (let cell of row.cells) {
+                        rowData.push(cell.textContent.trim());
+                    }
+                    jsonData.push(rowData);
+                }
+                
+                // Buat sheet
+                const ws = XLSX.utils.aoa_to_sheet(jsonData);
+                XLSX.utils.book_append_sheet(wb, ws, `Tabel_${i+1}`);
+            }
+
+            statusText.textContent = "Mengunduh hasil...";
+            // Download file Excel
+            XLSX.writeFile(wb, wordFile.name.replace('.docx', '') + '_converted.xlsx');
+            
+            statusText.textContent = `Selesai! Berhasil mengekstrak ${tables.length} tabel.`;
+            loader.style.display = 'none';
+
+        } catch (error) {
+            console.error(error);
+            statusText.textContent = "Gagal: " + error.message;
+            loader.style.display = 'none';
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
